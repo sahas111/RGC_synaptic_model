@@ -60,82 +60,103 @@ nc.record(tsp) # After a simulation run, the elements of tsp will be the times a
 t_vec = h.Vector()             # Time stamp vector
 t_vec.record(h._ref_t)
 
-# v1NoSpike = h.Vector()
-# v1 = h.Vector()
+v1NoSpike = h.Vector()
+v1 = h.Vector()
 
-# tsp1= h.Vector()
-# tsp2= h.Vector()
-# tsp3= h.Vector()
-# tsp4= h.Vector()
+tsp1= h.Vector()
+tsp2= h.Vector()
+tsp3= h.Vector()
+tsp4= h.Vector()
+
+
+StartTimeBlock1=0+100
+StartTimeBlock2=500+100
+StartTimeBlock3=1000+100
+StartTimeBlock4=1150+100
+FinishTimeBlock4=2000+100
+
+sizetsp=tsp.size()
+
+#
 h.tstop = 500
 h.init()
 h.run()
 
-# StartTimeBlock1=0+100
-# StartTimeBlock2=500+100
-# StartTimeBlock3=1000+100
-# StartTimeBlock4=1150+100
-# FinishTimeBlock4=2000+100
-#
-sizetsp=tsp.size()
-print sizetsp
-#
 pylab.plot(t_vec, vCopy)
 pyplot.show()
-#
-#
-#
-# for i in (0,sizetsp-1): # divided the tsps into diffent blocks
-#
-#     if (tsp[i]<StartTimeBlock2):
-#         tsp1.append(tsp.x[i])
-#     if (tsp.x[i]>=StartTimeBlock2 and tsp.x[i]<=StartTimeBlock3):
-#         tsp2.append(tsp.x[i])
-#     if (tsp.x[i]>StartTimeBlock3 and tsp.x[i]<StartTimeBlock4):
-#         tsp3.append(tsp.x[i])
-#     if (tsp.x[i]>StartTimeBlock4 and tsp.x[i]<FinishTimeBlock4):
-#         tsp4.append(tsp.x[i])
-#
-#
-# dt = 1
-#
-# for k in (0,StartTimeBlock2/dt-1):
-#     v1.append(vCopy.x[k]) # making the voltage vector for tsp1
-#
-#
-# v1_slope = v1.deriv()
-# length_of_block = 2/dt
-# threshold=0.01 #10mV/1s = 10mV/1000ms
-#
-# for k in (0,v1.size()-1):
-#     if (v1_slope.x[k] > threshold):
-#         k=k+length_of_block
-#     else:
-#         v1NoSpike.append(vCopy.x[k])
-#
-# v1NoSpikeMean=v1NoSpike.mean() # calculating the resting voltage from block1
-#
-#
-#
-# isivec1 = copy.copy(tsp1)
-# isivec2 = copy.copy(tsp1)
-# isivec3 = copy.copy(tsp1)
-# isivec4 = copy.copy(tsp1)
-# freq1 = h.Vector(isivec1.size())
-# freq2 = h.Vector(isivec2.size())
-# freq3 = h.Vector(isivec3.size())
-# freq4 = h.Vector(isivec4.size())
-#
-#
-# if (freq1.size()==0):#if no spike
-#     FreqSize1=0
-#     FreqMean1=0
-#     meanisi1=0
-#
-#
-#
-#
-#
-#
-#
+
+
+
+
+
+
+for i in (0,sizetsp-1): # divided the tsps into diffent blocks
+
+    if sizetsp == 0.0:
+        break;
+    elif (tsp.x[i]<StartTimeBlock2):
+        tsp1.append(tsp.x[i])
+    elif (tsp.x[i]>=StartTimeBlock2 and tsp.x[i]<=StartTimeBlock3):
+        tsp2.append(tsp.x[i])
+    elif (tsp.x[i]>StartTimeBlock3 and tsp.x[i]<StartTimeBlock4):
+        tsp3.append(tsp.x[i])
+    elif (tsp.x[i]>StartTimeBlock4 and tsp.x[i]<FinishTimeBlock4):
+        tsp4.append(tsp.x[i])
+
+
+dt = 1
+
+for k in (0,StartTimeBlock2/dt-1):
+    v1.append(vCopy.x[k]) # making the voltage vector for tsp1
+
+
+v1_slope = v1.deriv()
+length_of_block = 1
+threshold=0.01 #10mV/1s = 10mV/1000ms
+
+for k in (0,np.int(v1_slope.size())-1):
+    if (v1_slope.x[k] > threshold):
+        k=k+length_of_block
+    else:
+        v1NoSpike.append(vCopy.x[k])
+
+v1NoSpikeMean=v1NoSpike.mean() # calculating the resting voltage from block1
+
+
+
+isivec1 = copy.copy(tsp1)
+isivec2 = copy.copy(tsp1)
+isivec3 = copy.copy(tsp1)
+isivec4 = copy.copy(tsp1)
+freq1 = h.Vector(isivec1.size())
+freq2 = h.Vector(isivec2.size())
+freq3 = h.Vector(isivec3.size())
+freq4 = h.Vector(isivec4.size())
+
+
+if (freq1.size()==0): #if no spike
+    FreqSize1=0
+    FreqMean1=0
+    meanisi1=0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

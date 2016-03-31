@@ -17,24 +17,49 @@ from matplotlib import pyplot
 
 soma = h.Section()
 
+# soma.nseg = 1
+# soma.diam = 18.8
+# soma.L = 18.8
+# soma.Ra = 123.0
+
 soma.nseg = 1
-soma.diam = 18.8
-soma.L = 18.8
-soma.Ra = 123.0
+soma.diam = 25
+soma.L = 25
 
-
-
-#soma.insert('hh')
-#soma.insert('CaT')
 soma.insert('pas')
+e_pas=-60
+g_pas=.00005
+Ra=110
+
+soma.insert('spike')
+gnabar_spike = 0.04
+gkbar_spike = 0.012
+gabar_spike = 0.036
+gcabar_spike = 0.0022
+gkcbar_spike = 0.00005
+
+
+celsius = 22
+ena=35
+ek=-75
+
+soma.insert ('cad')
+depth_cad = 3 #(micron)
+taur_cad = 10 # (ms)
+
+# soma.insert('hh')
+# soma.insert('CaT')
+
+
+'''soma.insert('pas')
 soma.insert('spike')
 soma.insert('cad')
 #soma.insert ('hd')
-#soma.insert ('lva')
-
+#soma.insert ('lva')'''
 
 # excitatory synapse connection at soma
 #ms
+
 
 d={} #list for keeping excitatory and inhibitory synaptic parameters
 
@@ -113,12 +138,13 @@ h.run()
 pylab.subplot(1,1,1)
 pylab.plot(t_vec, v_vec)
 pyplot.show()
+
+'''
 pylab.subplot(2,1,1)
 pylab.plot(t_vec, vecexc['i_excsyn'].div(5000)) # divided by membrane resistance (5,000 to 100,000 o/cm2), values obtained with intracellular sharp electrodes and wholecell recordings
 pylab.subplot(2,1,2)
 pylab.plot(t_vec, vecinh['i_inhsyn'].div(5000))
-
-pyplot.show()
+pyplot.show()'''
 
 # pyplot.plot(t_vec, v_vec)
 # pyplot.xlabel('time (ms)')
