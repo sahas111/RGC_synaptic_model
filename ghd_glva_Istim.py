@@ -114,7 +114,7 @@ tsp4= h.Vector()
 
 
 
-h.tstop = 2200
+h.tstop = 2100
 h.init()
 h.run()
 sizetsp=tsp.size()
@@ -135,7 +135,7 @@ pyplot.show()
 for i in range(0,np.int(sizetsp)): # divided the tsps into diffent blocks
     if sizetsp == 0:
         break;
-    if (tsp.x[i]>StartTimeBlock1 and tsp.x[i]<StartTimeBlock2):
+    if (tsp.x[i]<StartTimeBlock2):#  if (tsp.x[i]>StartTimeBlock1 and tsp.x[i]<StartTimeBlock2)
         tsp1.append(tsp.x[i])
     if (tsp.x[i]>StartTimeBlock2 and tsp.x[i]<=StartTimeBlock3):
         tsp2.append(tsp.x[i])
@@ -291,7 +291,7 @@ if (v1NoSpikeMean>-60 and v1NoSpikeMean<=-50):
 else:
     v1NoSpikeMean01=0
 
-if (FreqMean1>=28 and FreqMean1<=54): #change the S values 34-54
+if (FreqMean1>=34 and FreqMean1<=54): #change the S values 34-54
     FreqMean1_S=1
 
 else:
@@ -303,7 +303,7 @@ if (FreqMean2==0):
 else:
     FreqMean2_01=0 #no activity during hyperpolarization -0.2 nA
 
-if (FreqMean4>=60):
+if (FreqMean3>=60):
     FreqMean3_01=1
 else:
     FreqMean3_01=0 #burst after hyperpolarization
