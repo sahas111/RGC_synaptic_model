@@ -41,9 +41,9 @@ soma.gcabar_spike = 0.0022
 soma.gkcbar_spike = 0.00005
 
 
-celsius_spike = 22
-ena_spike=35
-ek_spike=-75 #75
+h.celsius = 22
+soma.ena=35
+soma.ek=-75 #75
 
 soma.insert ('cad')
 soma.depth_cad = 0.1 #(micron)3
@@ -70,29 +70,32 @@ soma.insert ('nap')
 # f.write( 'gbar_nap, gbar_lva,  ghdbar_hd ,  v1NoSpikeMean , FreqMean1 ,  FreqSize1 ,  meanisi1 ,  stdev1 ,  cvisi1 , FreqMean2 ,  FreqSize2 ,  meanisi2 ,  stdev2 ,  cvisi2 , FreqMean3 ,  FreqSize3 ,  meanisi3 ,  stdev3 ,  cvisi3 , v1NoSpikeMean01 , FreqMean1_T , FreqMean1_S , FreqMean2_01 ,  FreqMean3_01 ,  AllCondSatOFF' )
 
 
-stim = h.IClamp(soma(0.5))
 
-stim.amp = -0.2
-stim.dur = 499
-stim.delay = 601
 
 
 tsp = h.Vector()
 vCopy = h.Vector()
-ghdbar_hd =h.Vector()
-gbar_lva = h.Vector()
-gbar_nap=h.Vector()
+# ghdbar_hd =h.Vector()
+# gbar_lva = h.Vector()
+# gbar_nap=h.Vector()
 
 soma.ghdbar_hd = 2e-6 #S/cm2,OFF-S
 soma.gbar_lva = 1.2e-3  #S/cm2,
 soma.gbar_nap = 5e-8 #S/cm2
 
+stim = h.IClamp(soma(0.5))
+
+stim.amp = -0.2
+stim.dur = 500
+stim.delay = 600
 
 
+# building up a null target to record the spikes(if v>threshold)
+h('objref nil')
 
-h("objref nil")
+#nc = h.NetCon(soma(0.5)._ref_v,h.nil)
+nc = h.NetCon(soma(0.5)._ref_v,h.nil, 0, 0, 0)
 
-nc = h.NetCon(soma(0.5)._ref_v,h.nil)#0, 0, 0
 
 nc.record(tsp)
 vCopy.record(soma(0.5)._ref_v)
@@ -129,7 +132,7 @@ pyplot.show()
 
 
 
-for i in range(0,np.int(sizetsp-1)): # divided the tsps into diffent blocks
+for i in range(0,np.int(sizetsp)): # divided the tsps into diffent blocks
     if sizetsp == 0:
         break;
     if (tsp.x[i]>StartTimeBlock1 and tsp.x[i]<StartTimeBlock2):
@@ -147,14 +150,14 @@ v1NoSpike = h.Vector()
 
 
 dt =1
-for k in range(0,StartTimeBlock2/dt):
+for k in range(StartTimeBlock1,StartTimeBlock2/dt):
     v1.append(vCopy.x[k]) # making the voltage vector for tsp1
 
 
 v1_slope = copy.copy(v1)
-v1_slope.deriv()
+v1_slope.deriv(1) #
 length_of_block = 2/dt
-threshold=0.02 #20mV/1s = 20mV/1000ms ????? 10 mv/s is not working
+threshold=0.01 #20mV/1s = 20mV/1000ms ????? 30 mv/s  working only
 
 # for k in range(0,np.int((v1_slope.size())-1)):
 #     if (v1_slope.x[k] < threshold):
@@ -169,7 +172,7 @@ while (k < np.int((v1_slope.size()))):
         k += 1
 
 if (v1NoSpike.size() == 0):
-    v1NoSpikeMean=-55 # no NaN maybe?
+    v1NoSpikeMean=0.0 # no NaN maybe?
 else:
     v1NoSpikeMean=v1NoSpike.mean() # calculating the resting voltage from block1
 
@@ -179,7 +182,8 @@ isivec1 = copy.copy(tsp1)
 isivec2 =copy.copy(tsp2)
 isivec3 = copy.copy(tsp3)
 isivec4 = copy.copy(tsp4)
-freq1 = h.Vector(isivec1.size())
+# freq1 = h.Vector(isivec1.size())
+freq1 = h.Vector(13)
 freq2 = h.Vector(isivec2.size())
 freq3 = h.Vector(isivec3.size())
 freq4 = h.Vector(isivec4.size())
@@ -192,10 +196,10 @@ if (freq1.size()==1):
     FreqSize1=1;FreqMean1=0;meanisi1=0
 
 if (freq1.size()>=2):
-   isivec1.deriv() #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
-   for i in range(0,np.int(freq1.size())): # change it to np.int(freq1.size()-1)
+   isivec1.deriv(1) #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
+   for i in range(0,np.int(isivec1.size()-1)): # change it to np.int(freq1.size()-1)
        freq1.x[i] = 1000/isivec1.x[i]#instanteneous frequency
-       i = i+1
+
    FreqSize1=freq1.size()
    FreqMean1=freq1.mean()
    meanisi1=isivec1.mean()
