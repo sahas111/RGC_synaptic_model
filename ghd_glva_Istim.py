@@ -75,15 +75,15 @@ soma.insert ('nap')
 
 tsp = h.Vector()
 vCopy = h.Vector()
-# ghdbar_hd =h.Vector()
-# gbar_lva = h.Vector()
-# gbar_nap=h.Vector()
+ghdbar_hd =h.Vector()
+gbar_lva = h.Vector()
+gbar_nap=h.Vector()
 
 soma.ghdbar_hd = 2e-6 #S/cm2,OFF-S
 soma.gbar_lva = 1.2e-3  #S/cm2,
 soma.gbar_nap = 5e-8 #S/cm2
 
-stim = h.IClamp(soma(0.5))
+stim = h.IClamp(soma(0))
 
 stim.amp = -0.2
 stim.dur = 500
@@ -155,9 +155,9 @@ for k in range(StartTimeBlock1,StartTimeBlock2/dt):
 
 
 v1_slope = copy.copy(v1)
-v1_slope.deriv(1) #
+v1_slope.deriv(1) #dx=1
 length_of_block = 2/dt
-threshold=0.01 #20mV/1s = 20mV/1000ms ????? 30 mv/s  working only
+threshold=10 #unit will be 10 mv/ms
 
 # for k in range(0,np.int((v1_slope.size())-1)):
 #     if (v1_slope.x[k] < threshold):
@@ -182,13 +182,13 @@ isivec1 = copy.copy(tsp1)
 isivec2 =copy.copy(tsp2)
 isivec3 = copy.copy(tsp3)
 isivec4 = copy.copy(tsp4)
-# freq1 = h.Vector(isivec1.size())
-freq1 = h.Vector(13)
+
+freq1 = h.Vector(isivec1.size())
 freq2 = h.Vector(isivec2.size())
 freq3 = h.Vector(isivec3.size())
 freq4 = h.Vector(isivec4.size())
 
-     ###### First time block######
+     ###### First time block ######
 if (freq1.size()==0):
     FreqSize1=0; FreqMean1=0; meanisi1=0
 
@@ -197,8 +197,8 @@ if (freq1.size()==1):
 
 if (freq1.size()>=2):
    isivec1.deriv(1) #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
-   for i in range(0,np.int(isivec1.size()-1)): # change it to np.int(freq1.size()-1)
-       freq1.x[i] = 1000/isivec1.x[i]#instanteneous frequency
+   for i in range(0,np.int(isivec1.size())): # change it to np.int(freq1.size()-1)
+       freq1.x[i] = 1000.0/isivec1.x[i]#instanteneous frequency
 
    FreqSize1=freq1.size()
    FreqMean1=freq1.mean()
@@ -222,8 +222,8 @@ if (freq2.size()==1):
     FreqSize2=1;FreqMean2=0;meanisi2=0
 
 if (freq2.size()>=2):
-    isivec2.deriv() #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
-    for i in range(0,np.int(freq2.size())):
+    isivec2.deriv(1) #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
+    for i in range(0,np.int(isivec2.size())):
         freq2.x[i] = 1000/isivec2.x[i] #instanteneous frequency
     FreqSize2=freq2.size()
     FreqMean2=freq2.mean()
@@ -246,7 +246,7 @@ if (freq3.size()==1):
 
 if (freq3.size()>=2):
     isivec3.deriv() #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
-    for i in range(0,np.int(freq3.size())):
+    for i in range(0,np.int(isivec3.size())):
         freq3.x[i] = 1000/isivec3.x[i] #instanteneous frequency
     FreqSize3=freq3.size()
     FreqMean3=freq3.mean()
@@ -269,7 +269,7 @@ if (freq4.size()==1):
 
 if (freq4.size()>=2):
     isivec4.deriv() #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
-    for i in range(0,np.int(freq4.size())):
+    for i in range(0,np.int(isivec4.size())):
         freq4.x[i] = 1000/isivec4.x[i] #instanteneous frequency
     FreqSize4=freq4.size()
     FreqMean4=freq4.mean()
@@ -303,7 +303,7 @@ if (FreqMean2==0):
 else:
     FreqMean2_01=0 #no activity during hyperpolarization -0.2 nA
 
-if (FreqMean3>=60):
+if (FreqMean4>=60):
     FreqMean3_01=1
 else:
     FreqMean3_01=0 #burst after hyperpolarization
