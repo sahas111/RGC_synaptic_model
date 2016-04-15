@@ -114,7 +114,7 @@ tsp4= h.Vector()
 
 
 
-h.tstop = 2100
+h.tstop = 5000
 h.init()
 h.run()
 sizetsp=tsp.size()
@@ -122,7 +122,7 @@ sizetsp=tsp.size()
 StartTimeBlock1=0+100
 StartTimeBlock2=500+100
 StartTimeBlock3=1000+100
-StartTimeBlock4=1150+100
+StartTimeBlock4=1200+100
 FinishTimeBlock4=2000+100
 
 
@@ -212,9 +212,8 @@ if (freq1.size()>=2):
 
 
 
-
-
                   ###### Second time block######
+
 if (freq2.size()==0):
     FreqSize2=0; FreqMean2=0; meanisi2=0
 
