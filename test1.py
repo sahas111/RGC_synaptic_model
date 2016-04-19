@@ -80,7 +80,7 @@ d["excsyn1"]= h.ExpSyn(0.5, sec=soma) # position=0.5
 d["excsyn1"].tau = 1 #ms decay time constant
 d["excsyn1"].e = 0 #mV reversal potential
 
-d["excsyn1"].i = 0.5 #nA synaptic current
+d["excsyn1"].i = 0 #nA synaptic current
 
 
 # d["inhsyn1"] = h.ExpSyn(0.8, sec=soma)
@@ -109,7 +109,6 @@ for x in range(0,1): #(1,exc['centers'].size):
     d["ppexc{0}".format(x)].noise = 1
 
     d["ncppexc{0}".format(x)] = h.NetCon( d["ppexc{0}".format(x)], d["excsyn1"]) #connecting the poisson stimulus and the synapse
-
 
     d["ncppexc{0}".format(x)].weight[0] = weigh#((exc['centers'][0,i]))/(-70-0) # i = G * (v - e)  G = weight * exp(-t/tau);
     d["ncppexc{0}".format(x)].delay = 0 #g
@@ -156,8 +155,8 @@ h.tstop = 100 #ms
 h.run()
 # pyplot.figure(figsize=(8,4)) # Default figsize is (8,6)
 
-# pylab.subplot(1,1,1)
-# pyplot.plot(t_vec, v_vec)
+pylab.subplot(1,1,1)
+pyplot.plot(t_vec, v_vec)
 # pyplot.show()
 # pylab.plot(t_vec, v_vec)
 # pyplot.show()
