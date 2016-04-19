@@ -83,10 +83,10 @@ d["excsyn1"].e = 0 #mV reversal potential
 d["excsyn1"].i = 0 #nA synaptic current
 
 
-# d["inhsyn1"] = h.ExpSyn(0.8, sec=soma)
-# d["inhsyn1"].tau = 1
-# d["inhsyn1"].e = -70
-# d["inhsyn1"].i = 0.5
+d["inhsyn1"] = h.ExpSyn(0.8, sec=soma)
+d["inhsyn1"].tau = 1
+d["inhsyn1"].e = -70
+d["inhsyn1"].i = 0
 
 
 
@@ -119,29 +119,32 @@ for x in range(0,1): #(1,exc['centers'].size):
 
 
 
+interin =10
+weighin = 0.5
+j =0
+for x in range(0,1):
 
-# i =0
-# for x in range(1,2):
-#
-#     d["ppinh{0}".format(x)] = h.NetStim(0.5)
-#     d["ppinh{0}".format(x)].interval = exc['counts'][0,i] # 1/f
-#     d["ppinh{0}".format(x)].number = 1e9
-#     d["ppinh{0}".format(x)].start = 100
-#     d["ppinh{0}".format(x)].noise = 0
-#     d["ncppinh{0}".format(x)] = h.NetCon( d["ppinh{0}".format(x)], d["inhsyn1"])
-#     d["ncppinh{0}".format(x)].weight[0] = (exc['centers'][0,i])/(0+70)
-#     d["ncppinh{0}".format(x)].delay = 0
-#
-#     i = i+1
+    d["ppinh{0}".format(x)] = h.NetStim(0.5)
+    d["ppinh{0}".format(x)].interval = inter #exc['counts'][0,i] # 1/f
+    d["ppinh{0}".format(x)].number = 1e9
+    d["ppinh{0}".format(x)].start = 0
+    d["ppinh{0}".format(x)].noise = 1
+    d["ncppinh{0}".format(x)] = h.NetCon( d["ppinh{0}".format(x)], d["inhsyn1"])
+    d["ncppinh{0}".format(x)].weight[0] =weighin #(exc['centers'][0,i])/(0+70)
+    d["ncppinh{0}".format(x)].delay = 0
+
+    j = j+1
+    inter = interin +10
+    weigh = weighin+0.5
 
 
 vecexc = {}
 vecexc['i_excsyn']= h.Vector()
 vecexc['i_excsyn'].record(d["excsyn1"]._ref_i)
 
-# vecinh = {}
-# vecinh['i_inhsyn']= h.Vector()
-# vecinh['i_inhsyn'].record( d["inhsyn1"]._ref_i)
+vecinh = {}
+vecinh['i_inhsyn']= h.Vector()
+vecinh['i_inhsyn'].record( d["inhsyn1"]._ref_i)
 
 
 
@@ -155,16 +158,17 @@ h.tstop = 100 #ms
 h.run()
 # pyplot.figure(figsize=(8,4)) # Default figsize is (8,6)
 
-pylab.subplot(1,1,1)
+
+pylab.subplot(3,1,1)
 pyplot.plot(t_vec, v_vec)
 # pyplot.show()
 # pylab.plot(t_vec, v_vec)
 # pyplot.show()
 
-# pylab.subplot(2,1,1)
+pylab.subplot(3,1,2)
 pyplot.plot(t_vec, vecexc['i_excsyn']) #div(5000)) # divided by membrane resistance (5,000 to 100,000 o/cm2), values obtained with intracellular sharp electrodes and wholecell recordings
-# # pylab.subplot(2,1,2)
-# # pylab.plot(t_vec, vecinh['i_inhsyn'].div(5000))
+pylab.subplot(3,1,3)
+pylab.plot(t_vec, vecinh['i_inhsyn'])#.div(5000))
 pyplot.show()
 
 # pyplot.plot(t_vec, v_vec)
