@@ -2,7 +2,8 @@ __author__ = 'Susmita'
 
 import sys
 import scipy.io
-exc= scipy.io.loadmat('histdata.mat')
+exc= scipy.io.loadmat('exchistdata.mat')
+inh = scipy.io.loadmat('inhhistdata.mat')
 sys.path = ['/Applications/NEURON-7.4/nrn/lib/python'] + sys.path
 
 # print sys.path
@@ -79,7 +80,6 @@ d={} #list for keeping excitatory and inhibitory synaptic parameters
 d["excsyn1"]= h.ExpSyn(0.5, sec=soma) # position=0.5
 d["excsyn1"].tau = 1 #ms decay time constant
 d["excsyn1"].e = 0 #mV reversal potential
-
 d["excsyn1"].i = 0 #nA synaptic current
 
 
@@ -91,16 +91,19 @@ d["inhsyn1"].i = 0
 
 
 
-i = 0
-inter =10
-weigh = 1
 
-for x in range(0,1): #(1,exc['centers'].size):
+i = exc['centers'].size
+
+for x in range(0,i):
 
 
     d["ppexc{0}".format(x)] = h.NetStim(0.5)
     # Creates a NetStim that will generate a stream of events that occur at times t0, t1, . . . ti, . . . such that the inter-event intervals are governed by the negative exponential distribution with mean interval equal to ISI.
-    d["ppexc{0}".format(x)].interval = inter #exc['counts'][0,i]
+    if (exc['freq'][0,x]==0):
+        d["ppexc{0}".format(x)].interval = 0
+    else:
+        d["ppexc{0}".format(x)].interval = (1.0/exc['freq'][0,x])*1000
+
     # The maximum number of spikes that will be generated in any simulation is "number".
     d["ppexc{0}".format(x)].number = 1e9
     # earliest possible time of synaptic activation
@@ -110,32 +113,30 @@ for x in range(0,1): #(1,exc['centers'].size):
 
     d["ncppexc{0}".format(x)] = h.NetCon( d["ppexc{0}".format(x)], d["excsyn1"]) #connecting the poisson stimulus and the synapse
 
-    d["ncppexc{0}".format(x)].weight[0] = weigh#((exc['centers'][0,i]))/(-70-0) # i = G * (v - e)  G = weight * exp(-t/tau);
+    d["ncppexc{0}".format(x)].weight[0] = -(exc['centers'][0,x])/(-70-0) # i = G * (v - e)  G = weight * exp(-t/tau);
     d["ncppexc{0}".format(x)].delay = 0 #g
 
-    i = i+1
-    inter = inter +10
-    weigh = weigh+0.5
 
 
 
-interin =10
-weighin = 0.5
-j =0
-for x in range(0,1):
 
-    d["ppinh{0}".format(x)] = h.NetStim(0.5)
-    d["ppinh{0}".format(x)].interval = inter #exc['counts'][0,i] # 1/f
+
+
+j= inh['centers'].size
+
+for x in range(0,j):
+
+    d["ppinh{0}".format(x)] = h.NetStim(0.8)
+    d["ppinh{0}".format(x)].interval = (1.0/inh['freq'][0,x])*1000
     d["ppinh{0}".format(x)].number = 1e9
     d["ppinh{0}".format(x)].start = 0
     d["ppinh{0}".format(x)].noise = 1
     d["ncppinh{0}".format(x)] = h.NetCon( d["ppinh{0}".format(x)], d["inhsyn1"])
-    d["ncppinh{0}".format(x)].weight[0] =weighin #(exc['centers'][0,i])/(0+70)
+    d["ncppinh{0}".format(x)].weight[0] =(inh['centers'][0,x])/(0+70)
     d["ncppinh{0}".format(x)].delay = 0
 
-    j = j+1
-    inter = interin +10
-    weigh = weighin+0.5
+
+
 
 
 vecexc = {}
@@ -154,19 +155,19 @@ v_vec.record(soma(0.5)._ref_v) # References to variables are available as _ref_r
 t_vec.record(h._ref_t)
 
 
-h.tstop = 100 #ms
+h.tstop = 5000 #ms
 h.run()
 # pyplot.figure(figsize=(8,4)) # Default figsize is (8,6)
 
 
 pylab.subplot(3,1,1)
-pyplot.plot(t_vec, v_vec)
+pylab.plot(t_vec, v_vec)
 # pyplot.show()
 # pylab.plot(t_vec, v_vec)
 # pyplot.show()
 
 pylab.subplot(3,1,2)
-pyplot.plot(t_vec, vecexc['i_excsyn']) #div(5000)) # divided by membrane resistance (5,000 to 100,000 o/cm2), values obtained with intracellular sharp electrodes and wholecell recordings
+pylab.plot(t_vec, vecexc['i_excsyn']) #div(5000)) # divided by membrane resistance (5,000 to 100,000 o/cm2), values obtained with intracellular sharp electrodes and wholecell recordings
 pylab.subplot(3,1,3)
 pylab.plot(t_vec, vecinh['i_inhsyn'])#.div(5000))
 pyplot.show()
