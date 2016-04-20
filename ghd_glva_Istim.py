@@ -60,7 +60,7 @@ soma.insert ('nap')
 
 '''//Check 4 conditions for
 //1.vrest (on the First block 0,500)
-//2.spont activity  ON 0 Hz (First Block 0,500)
+//2.spont activity  ON 0 Hz/OFF-S: [34, 54] Hz/OFF-T: [9 29] Hz (First Block 0,500)
 //3.no activity during 500 ms hyperpolarization -0.2 nA (Second Block 500,1000)
 //4.At the termination of 500 ms stimulus of -0.2 nA (Third Block 1000,1150)
 //subscript  1  corresponds to first block,  2  to the second block etc
@@ -87,19 +87,19 @@ gbar_nap=h.Vector()
 
 stim = h.IClamp(soma(0))
 
-stim.amp = -0.2
+stim.amp = -0.02
 stim.dur = 500
 stim.delay = 600
 
-zz=0
+
 soma.gbar_nap=5e-8
-for zz in range(0,13):
+for zz in range(0,1):#(0,13)
     soma.gbar_lva=2e-4
-    jj=0
-    for jj in range(0,13):#13 or 20
-        ii=0
-        soma.ghdbar_hd=1e-6
-        for ii in range(0,2): #13 or 20
+
+    for jj in range(0,17):#13 or 20
+
+        soma.ghdbar_hd=2e-6
+        for ii in range(0,15): #2,13 or 20
 
             start_time = time.time()
 
@@ -162,7 +162,7 @@ for zz in range(0,13):
 
 
             dt =1
-            for k in range(StartTimeBlock1,StartTimeBlock2/dt):
+            for k in range(0,StartTimeBlock2/dt):
                 v1.append(vCopy.x[k]) # making the voltage vector for tsp1
 
 
@@ -302,7 +302,7 @@ for zz in range(0,13):
             else:
                 v1NoSpikeMean01=0
 
-            if (FreqMean1>=34 and FreqMean1<=54): #change the S values 34-54
+            if (FreqMean1>=9 and FreqMean1<=54): #change the S values 34-54
                 FreqMean1_S=1
 
             else:
@@ -339,17 +339,34 @@ for zz in range(0,13):
             else:
                 m=0
 
-            soma.ghdbar_hd=soma.ghdbar_hd+1e-6
+            soma.ghdbar_hd=soma.ghdbar_hd+1e-6 #1e-6
 
             # print "elapsed_time = "  + str(time.time() - start_time)
 
-        soma.gbar_lva=soma.gbar_lva+2e-4
+        soma.gbar_lva=soma.gbar_lva+1e-4 #2e-4
 
     soma.gbar_nap=soma.gbar_nap*10
 
 
 
 
+'''import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(ghdbar_hd, gbar_lva, gbar_nap)
+ax.scatter(ghdbar_hd_syn, gbar_lva_syn, gbar_nap_syn,c='g')
+
+ax.set_xlabel('ghdbar_hd')
+ax.set_ylabel('gbar_lva')
+ax.set_zlabel('gbar_nap')
+
+ax.plot_wireframe(ghdbar_hd, gbar_lva, gbar_nap)
+
+
+ax.plot_trisurf(ghdbar_hd, gbar_lva, gbar_nap)
+
+ax.plot_trisurf(ghdbar_hd_syn, gbar_lva_syn, gbar_nap_syn)'''
 
 
 
