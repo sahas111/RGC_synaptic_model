@@ -85,9 +85,9 @@ gbar_nap=h.Vector()
 # soma.gbar_lva = 1.2e-3  #S/cm2,
 # soma.gbar_nap = 5e-8 #S/cm2
 
-stim = h.IClamp(soma(0))
+stim = h.IClamp(soma(0.5))
 
-stim.amp = -0.02
+stim.amp = -0.020
 stim.dur = 500
 stim.delay = 600
 
@@ -103,11 +103,9 @@ for zz in range(0,1):#(0,13)
 
             start_time = time.time()
 
-            h('objref nil')#building up a null target to record the spikes(if v>threshold)
+            h("objref nil")
 
-            #nc = h.NetCon(soma(0.5)._ref_v,h.nil)
-            nc = h.NetCon(soma(0.5)._ref_v,h.nil, 0, 0, 0)
-
+            nc = h.NetCon(soma(0.5)._ref_v,h.nil)
 
             nc.record(tsp)
             vCopy.record(soma(0.5)._ref_v)
@@ -124,9 +122,8 @@ for zz in range(0,1):#(0,13)
             tsp3= h.Vector()
             tsp4= h.Vector()
 
-
-
-            h.tstop = 5000
+            dt=1
+            h.tstop = 2100
             h.init()
             h.run()
             sizetsp=tsp.size()
@@ -134,7 +131,7 @@ for zz in range(0,1):#(0,13)
             StartTimeBlock1=0+100
             StartTimeBlock2=500+100
             StartTimeBlock3=1000+100
-            StartTimeBlock4=1200+100
+            StartTimeBlock4=1150+100#1150+100
             FinishTimeBlock4=2000+100
 
 
@@ -142,14 +139,12 @@ for zz in range(0,1):#(0,13)
             # pylab.plot(t_vec, vCopy)
             # pyplot.show()
 
-
-
             for i in range(0,np.int(sizetsp)): # divided the tsps into diffent blocks
                 if sizetsp == 0:
                     break;
                 if (tsp.x[i]<StartTimeBlock2):#  if (tsp.x[i]>StartTimeBlock1 and tsp.x[i]<StartTimeBlock2)
                     tsp1.append(tsp.x[i])
-                if (tsp.x[i]>StartTimeBlock2 and tsp.x[i]<=StartTimeBlock3):
+                if (tsp.x[i]>=StartTimeBlock2 and tsp.x[i]<=StartTimeBlock3):
                     tsp2.append(tsp.x[i])
                 if (tsp.x[i]>StartTimeBlock3 and tsp.x[i]<StartTimeBlock4):
                     tsp3.append(tsp.x[i])
@@ -161,15 +156,15 @@ for zz in range(0,1):#(0,13)
             v1NoSpike = h.Vector()
 
 
-            dt =1
-            for k in range(0,StartTimeBlock2/dt):
+
+            for k in range(0,StartTimeBlock2/dt*40):
                 v1.append(vCopy.x[k]) # making the voltage vector for tsp1
 
 
             v1_slope = copy.copy(v1)
             v1_slope.deriv(1) #dx=1
             length_of_block = 2/dt
-            threshold=10 #unit will be 10 mv/ms
+            threshold=0.01 #unit will be 10 mv/ms
 
             # for k in range(0,np.int((v1_slope.size())-1)):
             #     if (v1_slope.x[k] < threshold):
@@ -235,7 +230,7 @@ for zz in range(0,1):#(0,13)
             if (freq2.size()>=2):
                 isivec2.deriv(1) #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
                 for i in range(0,np.int(isivec2.size())):
-                    freq2.x[i] = 1000/isivec2.x[i] #instanteneous frequency
+                    freq2.x[i] = 1000.0/isivec2.x[i] #instanteneous frequency
                 FreqSize2=freq2.size()
                 FreqMean2=freq2.mean()
                 meanisi2=isivec2.mean()
@@ -256,7 +251,7 @@ for zz in range(0,1):#(0,13)
                 FreqSize3=1;FreqMean3=0;meanisi3=0
 
             if (freq3.size()>=2):
-                isivec3.deriv() #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
+                isivec3.deriv(1) #isivec contains the interspike intervals//Vector class's deriv method using Euler method and "dx" parameter == 1 transforms recorded spike times to interspike intervals at machine language speeds.//
                 for i in range(0,np.int(isivec3.size())):
                     freq3.x[i] = 1000/isivec3.x[i] #instanteneous frequency
                 FreqSize3=freq3.size()
@@ -296,7 +291,7 @@ for zz in range(0,1):#(0,13)
 
 
                                #########--------OFF-S-------#########
-            if (v1NoSpikeMean>-60 and v1NoSpikeMean<=-50):
+            if (v1NoSpikeMean>-61 and v1NoSpikeMean<=-50):
                 v1NoSpikeMean01=1
 
             else:
@@ -314,7 +309,7 @@ for zz in range(0,1):#(0,13)
             else:
                 FreqMean2_01=0 #no activity during hyperpolarization -0.2 nA
 
-            if (FreqMean3>=60):
+            if (FreqMean3>=60):#60
                 FreqMean3_01=1
             else:
                 FreqMean3_01=0 #burst after hyperpolarization
@@ -331,13 +326,14 @@ for zz in range(0,1):#(0,13)
             if (v1NoSpikeMean01==1 and FreqMean1_S==1 and  FreqMean2_01==1 and FreqMean3_01==1):
                 AllCondSatOFF=1
                 # f.write( "%g %g %g" %soma.gbar_nap %soma.gbar_lva %soma.ghdbar_hd)
-
-
                 ghdbar_hd.append(soma.ghdbar_hd)
                 gbar_lva.append(soma.gbar_lva)
                 gbar_nap.append(soma.gbar_nap)
+
+
             else:
                 m=0
+
 
             soma.ghdbar_hd=soma.ghdbar_hd+1e-6 #1e-6
 
@@ -366,7 +362,19 @@ ax.plot_wireframe(ghdbar_hd, gbar_lva, gbar_nap)
 
 ax.plot_trisurf(ghdbar_hd, gbar_lva, gbar_nap)
 
-ax.plot_trisurf(ghdbar_hd_syn, gbar_lva_syn, gbar_nap_syn)'''
+ax.plot_trisurf(ghdbar_hd_syn, gbar_lva_syn, gbar_nap_syn)
+
+import numpy
+import numpy.random as nprnd
+import matplotlib.pyplot as plt
+
+plt.axis([1e-4,16e-4,1e-6,18e-6])
+plt.plot(gbar_lva_syn_wt,ghdbar_hd_syn_wt,linestyle='', marker='o',markersize=15,markerfacecolor='none')
+
+plt.plot(gbar_lva_syn, ghdbar_hd_syn,linestyle='', marker='^',markersize=10,markerfacecolor='blue')
+plt.xlabel('ghdbar_lva')
+plt.ylabel('ghdbar_hd')
+'''
 
 
 
