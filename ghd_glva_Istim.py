@@ -39,13 +39,15 @@ soma.insert('spike')
 soma.gnabar_spike = 0.04
 soma.gkbar_spike = 0.012
 soma.gabar_spike = 0.036
-soma.gcabar_spike = 0.0022
+soma.gcabar_spike = 0.002
 soma.gkcbar_spike = 0.00005
 
 
 h.celsius = 22
 soma.ena=35
 soma.ek=-75 #75
+
+
 
 soma.insert ('cad')
 soma.depth_cad = 0.1 #(micron)3
@@ -55,8 +57,13 @@ soma.taur_cad = 1.5 # (ms)10
 soma.insert ('lva')
 soma.insert ('hd')
 soma.insert ('nap')
+# soma.gbar_nap = 5e-8 #S/cm2
 
+h.ehd_hd =0
 
+# soma.ghdbar_hd = 4e-6 #S/cm2,OFF-S
+# soma.gbar_lva = 10e-4  #S/cm2,
+# soma.gbar_nap = 5e-8 #S/cm2
 
 '''//Check 4 conditions for
 //1.vrest (on the First block 0,500)
@@ -81,9 +88,7 @@ ghdbar_hd =h.Vector()
 gbar_lva = h.Vector()
 gbar_nap=h.Vector()
 
-# soma.ghdbar_hd = 2e-6 #S/cm2,OFF-S
-# soma.gbar_lva = 1.2e-3  #S/cm2,
-# soma.gbar_nap = 5e-8 #S/cm2
+
 
 stim = h.IClamp(soma(0.5))
 
@@ -122,8 +127,9 @@ for zz in range(0,1):#(0,13)
             tsp3= h.Vector()
             tsp4= h.Vector()
 
-            dt=1
-            h.tstop = 2100
+            h.dt=0.025
+            h.v_init =-65
+            h.tstop = 5000
             h.init()
             h.run()
             sizetsp=tsp.size()
@@ -131,7 +137,7 @@ for zz in range(0,1):#(0,13)
             StartTimeBlock1=0+100
             StartTimeBlock2=500+100
             StartTimeBlock3=1000+100
-            StartTimeBlock4=1150+100#1150+100
+            StartTimeBlock4=1150+150#1150+100
             FinishTimeBlock4=2000+100
 
 
@@ -146,7 +152,7 @@ for zz in range(0,1):#(0,13)
                     tsp1.append(tsp.x[i])
                 if (tsp.x[i]>=StartTimeBlock2 and tsp.x[i]<=StartTimeBlock3):
                     tsp2.append(tsp.x[i])
-                if (tsp.x[i]>StartTimeBlock3 and tsp.x[i]<StartTimeBlock4):
+                if (tsp.x[i]>=StartTimeBlock3 and tsp.x[i]<=StartTimeBlock4):
                     tsp3.append(tsp.x[i])
                 if (tsp.x[i]>StartTimeBlock4 and tsp.x[i]<FinishTimeBlock4):
                     tsp4.append(tsp.x[i])
@@ -157,13 +163,13 @@ for zz in range(0,1):#(0,13)
 
 
 
-            for k in range(0,StartTimeBlock2/dt*40):
+            for k in range(0,np.int((StartTimeBlock2/h.dt)*1)):
                 v1.append(vCopy.x[k]) # making the voltage vector for tsp1
 
 
             v1_slope = copy.copy(v1)
             v1_slope.deriv(1) #dx=1
-            length_of_block = 2/dt
+            length_of_block = 2
             threshold=0.01 #unit will be 10 mv/ms
 
             # for k in range(0,np.int((v1_slope.size())-1)):
@@ -291,7 +297,7 @@ for zz in range(0,1):#(0,13)
 
 
                                #########--------OFF-S-------#########
-            if (v1NoSpikeMean>-61 and v1NoSpikeMean<=-50):
+            if (v1NoSpikeMean>-60 and v1NoSpikeMean<=-50):
                 v1NoSpikeMean01=1
 
             else:
@@ -341,7 +347,7 @@ for zz in range(0,1):#(0,13)
 
         soma.gbar_lva=soma.gbar_lva+1e-4 #2e-4
 
-    soma.gbar_nap=soma.gbar_nap*10
+    # soma.gbar_nap=soma.gbar_nap*10
 
 
 
@@ -369,12 +375,20 @@ import numpy.random as nprnd
 import matplotlib.pyplot as plt
 
 plt.axis([1e-4,16e-4,1e-6,18e-6])
-plt.plot(gbar_lva_syn_wt,ghdbar_hd_syn_wt,linestyle='', marker='o',markersize=15,markerfacecolor='none')
+plt.plot(gbar_lva,ghdbar_hd,linestyle='', marker='o',markersize=15,markerfacecolor='none')
 
-plt.plot(gbar_lva_syn, ghdbar_hd_syn,linestyle='', marker='^',markersize=10,markerfacecolor='blue')
+plt.plot(gbar_lva, ghdbar_hd,linestyle='', marker='^',markersize=10,markerfacecolor='blue')
 plt.xlabel('ghdbar_lva')
 plt.ylabel('ghdbar_hd')
 '''
+
+# import matplotlib.pyplot as plt
+#
+# plt.axis([1e-4,16e-4,1e-6,18e-6])
+# plt.plot(gbar_lva,ghdbar_hd,linestyle='', marker='o',markersize=15,markerfacecolor='none')
+# plt.plot(gbar_lva_syn_rd, ghdbar_hd_syn_rd,linestyle='', marker='^',markersize=10,markerfacecolor='blue')
+# plt.show()
+
 
 
 
