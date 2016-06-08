@@ -6,8 +6,8 @@ import copy
 sys.path = ['/Applications/NEURON-7.4/nrn/lib/python'] + sys.path
 
 import scipy.io
-exc= scipy.io.loadmat('exchistdata.mat')
-inh = scipy.io.loadmat('inhhistdata.mat')
+exc= scipy.io.loadmat('wt-OFF-exc-output/wt_OFF_exc_output.mat')
+inh = scipy.io.loadmat('wt-OFF-inh-output/wt_OFF_inh_output.mat')
 
 # print sys.path
 import pylab
@@ -60,7 +60,9 @@ soma.insert ('lva')
 soma.insert ('hd')
 soma.insert ('nap')
 
-
+# soma.ghdbar_hd = 4e-6 #S/cm2,OFF-S
+# soma.gbar_lva = 10e-4  #S/cm2,
+# soma.gbar_nap = 5e-8 #S/cm2
 
 '''//Check  conditions with the presence of synaptic activity:
 
@@ -75,13 +77,11 @@ soma.insert ('nap')
 
 tsp = h.Vector()
 vCopy = h.Vector()
-ghdbar_hd_syn =h.Vector()
-gbar_lva_syn = h.Vector()
-gbar_nap_syn=h.Vector()
+ghdbar_hd_syn_wt =h.Vector()
+gbar_lva_syn_wt = h.Vector()
+gbar_nap_syn_wt=h.Vector()
 
-# soma.ghdbar_hd = 2e-6 #S/cm2,OFF-S
-# soma.gbar_lva = 1.2e-3  #S/cm2,
-# soma.gbar_nap = 5e-8 #S/cm2
+
 
 # stim = h.IClamp(soma(0))
 #
@@ -92,13 +92,13 @@ gbar_nap_syn=h.Vector()
 d={} #list for keeping excitatory and inhibitory synaptic parameters
 
 d["excsyn1"]= h.ExpSyn(0.5, sec=soma) # position=0.5
-d["excsyn1"].tau = 5 #ms decay time constant
+d["excsyn1"].tau = 5 #ms decay time constant:from Tian et al.1998
 d["excsyn1"].e = 0 #mV reversal potential
 d["excsyn1"].i = 0 #nA synaptic current
 
 
 d["inhsyn1"] = h.ExpSyn(0.8, sec=soma)
-d["inhsyn1"].tau = 10
+d["inhsyn1"].tau = 10 #from Tian et al.1998
 d["inhsyn1"].e = -70
 d["inhsyn1"].i = 0
 
@@ -114,7 +114,8 @@ for x in range(0,i):
     d["ppexc{0}".format(x)] = h.NetStim(0.5)
     # Creates a NetStim that will generate a stream of events that occur at times t0, t1, . . . ti, . . . such that the inter-event intervals are governed by the negative exponential distribution with mean interval equal to ISI.
     if (exc['freq'][0,x]==0):
-        d["ppexc{0}".format(x)].interval = 0
+        d["ppexc{0}".format(x)].interval = 1e100
+        d["ppexc{0}".format(x)].number = 0
     else:
         d["ppexc{0}".format(x)].interval = (1.0/exc['freq'][0,x])*1000
 
@@ -127,10 +128,8 @@ for x in range(0,i):
 
     d["ncppexc{0}".format(x)] = h.NetCon( d["ppexc{0}".format(x)], d["excsyn1"]) #connecting the poisson stimulus and the synapse
 
-    d["ncppexc{0}".format(x)].weight[0] = -(exc['centers'][0,x])/(-70-0) # i = G * (v - e)  G = weight * exp(-t/tau);
+    d["ncppexc{0}".format(x)].weight[0] = -((exc['centers'][0,x])*1e-3)/(-70-0) # i = G * (v - e)  G = weight * exp(-t/tau);
     d["ncppexc{0}".format(x)].delay = 0 #g
-
-
 
 
 
@@ -141,12 +140,17 @@ j= inh['centers'].size
 for x in range(0,j):
 
     d["ppinh{0}".format(x)] = h.NetStim(0.8)
-    d["ppinh{0}".format(x)].interval = (1.0/inh['freq'][0,x])*1000
+    if (inh['freq'][0,x]==0):
+        d["ppexc{0}".format(x)].interval = 1e1000
+        d["ppinh{0}".format(x)].number = 0
+    else:
+        d["ppinh{0}".format(x)].interval = (1.0/inh['freq'][0,x])*1000
+
     d["ppinh{0}".format(x)].number = 1e9
     d["ppinh{0}".format(x)].start = 0
     d["ppinh{0}".format(x)].noise = 1
     d["ncppinh{0}".format(x)] = h.NetCon( d["ppinh{0}".format(x)], d["inhsyn1"])
-    d["ncppinh{0}".format(x)].weight[0] =(inh['centers'][0,x])/(0+70)
+    d["ncppinh{0}".format(x)].weight[0] =((inh['centers'][0,x])*1e-3)/(0+70)
     d["ncppinh{0}".format(x)].delay = 0
 
 
@@ -164,17 +168,15 @@ for zz in range(0,1):
         soma.ghdbar_hd=2e-6
         for ii in range(0,15): #13 or 20
 
-            start_time = time.time()
+            #start_time = time.time()
 
-            h('objref nil')#building up a null target to record the spikes(if v>threshold)
+            h("objref nil")
 
-            #nc = h.NetCon(soma(0.5)._ref_v,h.nil)
-            nc = h.NetCon(soma(0.5)._ref_v,h.nil, 0, 0, 0)
-
+            nc = h.NetCon(soma(0.5)._ref_v,h.nil)
 
             nc.record(tsp)
             vCopy.record(soma(0.5)._ref_v)
-             # After a simulation run, the elements of tsp will be the times at which the cell spiked # how to record it
+             # After a simulation run, the elements of tsp will be the times at which  the cell spiked # how to record it
 
 
             t_vec = h.Vector()             # Time stamp vector
@@ -187,8 +189,9 @@ for zz in range(0,1):
             tsp3= h.Vector()
             tsp4= h.Vector()
 
-
-
+            # h.v_init = -65
+            h.dt=0.025
+            h.v_init =-65
             h.tstop = 5000
             h.init()
             h.run()
@@ -196,9 +199,9 @@ for zz in range(0,1):
 
             StartTimeBlock1=0+100
             StartTimeBlock2=500+100
-            # StartTimeBlock3=1000+100
-            # StartTimeBlock4=1200+100
-            # FinishTimeBlock4=2000+100
+            StartTimeBlock3=1000+100
+            StartTimeBlock4=1150+150#1150+100
+            FinishTimeBlock4=2000+100
 
 
 
@@ -224,15 +227,15 @@ for zz in range(0,1):
             v1NoSpike = h.Vector()
 
 
-            dt =1
-            for k in range(0,StartTimeBlock2/dt):
+
+            for k in range(0,np.int((StartTimeBlock2/h.dt)*1)):
                 v1.append(vCopy.x[k]) # making the voltage vector for tsp1
 
 
             v1_slope = copy.copy(v1)
             v1_slope.deriv(1) #dx=1
-            length_of_block = 2/dt
-            threshold=10 #unit will be 10 mv/ms
+            length_of_block = 2
+            threshold=0.01 #unit will be 10 mv/ms
 
             # for k in range(0,np.int((v1_slope.size())-1)):
             #     if (v1_slope.x[k] < threshold):
@@ -397,12 +400,15 @@ for zz in range(0,1):
                 AllCondSatOFF=1
                 # f.write( "%g %g %g" %soma.gbar_nap %soma.gbar_lva %soma.ghdbar_hd)
 
+                # f.write( "%g %g %g" %soma.gbar_nap %soma.gbar_lva %soma.ghdbar_hd)
+                ghdbar_hd_syn_wt.append(soma.ghdbar_hd)
+                gbar_lva_syn_wt.append(soma.gbar_lva)
+                gbar_nap_syn_wt.append(soma.gbar_nap)
 
-                ghdbar_hd_syn.append(soma.ghdbar_hd)
-                gbar_lva_syn.append(soma.gbar_lva)
-                gbar_nap_syn.append(soma.gbar_nap)
+
             else:
                 m=0
+
 
             soma.ghdbar_hd=soma.ghdbar_hd+1e-6
 

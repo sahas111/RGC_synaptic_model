@@ -34,12 +34,14 @@ soma.g_pas=5e-5
 
 
 
+
 soma.insert('spike')
 soma.gnabar_spike = 0.04
 soma.gkbar_spike = 0.012
 soma.gabar_spike = 0.036
-soma.gcabar_spike = 0.0022
+soma.gcabar_spike = 0.002
 soma.gkcbar_spike = 0.00005
+
 
 
 h.celsius = 22
